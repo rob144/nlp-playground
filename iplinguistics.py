@@ -1,4 +1,5 @@
 #import the nodebox linguistics 'en' library
+#http://nodebox.net/code/index.php/Linguistics
 import en
 
 class conjugationcheck :
