@@ -49,10 +49,12 @@ public class VerbTool {
     */
 
     Map<String, String> verb_tenses = new HashMap<String, String>();
-    String path = "verb.txt";
-    data = open(path).readlines();
+    
+    List<String> stringList = Files.readAllLines(new File("verb.txt").toPath(), Charset.defaultCharset());
+    String[] data = stringList.toArray(new String[]{});
+    
     for(int i = 0; i < data.length; i++)){
-        String[] a = data[i].strip().split(",");
+        String[] a = data[i].trim().split(",");
         verb_tenses[a[0]] = a;
     }
 
@@ -63,9 +65,12 @@ public class VerbTool {
 
     Map<String, String> verb_lemmas = new HashMap<String, String>();
     Enumeration e1 = verb_tenses.keys();
+    
     while (e1.hasMoreElements()) {
+        
         String infinitive = (String) e1.nextElement();
         Enumeration e2 = verb_tenses.get(infinitive);
+        
         while (e2.hasMoreElements()){
             String tense = (String) e2.nextElement();
             if( tense != "" ){
@@ -101,14 +106,14 @@ public class VerbTool {
         return verb_tenses.get(v).get(i);
     }
 
-    public verb_present(v, person="", negate=False){
+    public verb_present(String v, String person, Boolean negate=False){
 
         /*Inflects the verb in the present tense.
         The person can be specified with 1, 2, 3, "1st", "2nd", "3rd", "plural", "*".
         Some verbs like be, have, must, can be negated.
         */
         
-        String person = str(person).replace("pl","*").strip("stndrgural");
+        person = str(person).replace("pl","*").strip("stndrgural");
         
         Map<String, String> hash = new HashMap<String, String>();
         map.put( "1" , "1st singular present" ); 
@@ -123,7 +128,7 @@ public class VerbTool {
         return verb_conjugate(v, "infinitive", negate);
     }
 
-    public verb_present_participle(v){
+    public verb_present_participle(String v){
 
         /* Inflects the verb in the present participle.
         For example:
@@ -133,7 +138,7 @@ public class VerbTool {
         return verb_conjugate(v, "present participle");
     }
     
-    public verb_past(v, person="", negate=False){
+    public verb_past(String v, String person="", Boolean negate=False){
 
         /* Inflects the verb in the past tense.
         The person can be specified with 1, 2, 3, "1st", "2nd", "3rd", "plural", "*".
@@ -142,7 +147,7 @@ public class VerbTool {
         give -> gave, be -> was, swim -> swam
         */
 
-        String person = str(person).replace("pl","*").strip("stndrgural");
+        person = str(person).replace("pl","*").trim("stndrgural");
         Map<String, String> hash = new HashMap<String, String>();
         map.put( "1" , "1st singular present" ); 
         map.put( "2" , "2nd singular present" ); 
@@ -171,27 +176,30 @@ public class VerbTool {
         return verb_tenses_keys.keys();
     }
 
-    public verb_tense(v){
+    public verb_tense(String v){
 
         /* Returns a string from verb_tenses_keys representing the verb's tense.
         * For example: given -> "past participle"
         */
 
         String infinitive = verb_infinitive(v);
-        a = verb_tenses[infinitive]
+        a = verb_tenses.get(infinitive);
         for tense in verb_tenses_keys:
-            if a[verb_tenses_keys[tense]] == v:
-                return tense
-            if a[verb_tenses_keys[tense]+len(verb_tenses_keys)] == v:
-                return tense
+            if( a[verb_tenses_keys[tense]] == v){
+                return tense;
+            }
+            if( a[verb_tenses_keys[tense]+len(verb_tenses_keys)] == v ){
+                return tense;
+            }
+        }
     }
 
-    public verb_is_tense(v, tense, negated=False){
+    public verb_is_tense(String v, String tense, Boolean negated=False){
     
         /* Checks whether the verb is in the given tense. */
         
-        if( tense in verb_tenses_aliases ){
-            tense = verb_tenses_aliases[tense];
+        if( verb_tenses_aliases.contains(tense) ){
+            tense = verb_tenses_aliases.get(tense);
         }if( verb_tense(v) == tense ){
             return true;
         }else{
@@ -199,17 +207,17 @@ public class VerbTool {
         }
     }
      
-    public verb_is_present(v, person="", negated=False){
+    public verb_is_present(String v, String person="", negated=False){
 
         /* Checks whether the verb is in the present tense. */
 
-        String person = str(person).replace("*","plural");
+        person = str(person).replace("*","plural");
         String tense = verb_tense(v);
         if( tense is not None){
-            if( "present" in tense and person in tense){
-                if( negated is False){
+            if( tense.contains("present") && tense.contains(person)){
+                if( negated == False){
                     return true;
-                else if( "n't" in v or " not" in v){
+                }else if( v.contains("n't") || v.contains(" not") ){
                     return true;
                 }
             }
@@ -218,7 +226,7 @@ public class VerbTool {
         return false;
     }
  
-    public verb_is_present_participle(v){
+    public verb_is_present_participle(String v){
 
         /* Checks whether the verb is in present participle. */
         
@@ -231,25 +239,26 @@ public class VerbTool {
 
     }
 
-    public verb_is_past(v, person="", negated=False):
+    public verb_is_past(String v, String person="", Boolean negated=False):
 
         /* Checks whether the verb is in the past tense. */
 
         person = str(person).replace("*","plural");
         String tense = verb_tense(v);
         if( tense != null && !tense.isEmpty() ){
-            if( "past" in tense and person in tense){
-                if( negated is false){
+            if( tense.contains("past") && tense.contains(person) ){
+                if( negated == false){
                     return true;
-                else if( "n't" in v or " not" in v){
+                }else if( v.contains("n't") || v.contains(" not") ){
                     return true;
                 }
             }
         }
 
         return False
+    }
 
-    public verb_is_past_participle(v):
+    public verb_is_past_participle(String v):
 
         /* Checks whether the verb is in past participle. */
 
