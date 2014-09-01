@@ -4,15 +4,6 @@ import en
 
 class conjugationcheck :
     
-    def first_person_sing(self) : return 1
-    def second_person(self) : return 2
-    def third_person_sing(self) : return 3
-    def third_person_sing(self) : return 3
-    def third_person_sing(self) : return 3
-    def third_person_sing(self) : return 3
-    def first_person_plural(self) : return '*'
-    def third_person_plural(self) : return '*'
-    
     def checkagreement(self, subject, verb) :
         #--subject of the verb e.g. in He loves her "he" is the subject
         #--verb e.g. in He loves her "loves" is the verb
@@ -21,24 +12,22 @@ class conjugationcheck :
         print 'Infinitive:' + infinitive
         #Build a list of all possible valid conjugations for the given person/subject
 
-        #first person singular (I)
-        #second person singular (you)
-        #third person singular (he/she/it/one)
-        #first person plural (we)
-        #second person plural (you)
-        #third person plural (they) 
-
-        options = {'I' : self.first_person_sing,
-                'you' : self.second_person,
-                'he' : self.third_person_sing,
-                'she' : self.third_person_sing,
-                'it' : self.third_person_sing,
-                'one' : self.third_person_sing,
-                'we' : self.first_person_plural,
-                'they' : self.third_person_plural
+        options = { 'I'     : 'first_person_sing',
+                    'you'   : 'second_person',
+                    'he'    : 'third_person_sing',
+                    'she'   : 'third_person_sing',
+                    'it'    : 'third_person_sing',
+                    'one'   : 'third_person_sing',
+                    'we'    : 'first_person_plural',
+                    'they'  : 'third_person_plural'
         }
         
-        person = options[subject.lower()]()
+        person=0
+
+        if 'first' in options[subject.lower()] : person = 1
+        if 'second' in options[subject.lower()] : person = 2
+        if 'third' in options[subject.lower()] : person = 3
+        if 'plural' in options[subject.lower()] : person = '*'
 
         valid_conjugations = []
 
