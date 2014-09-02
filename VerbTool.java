@@ -73,6 +73,48 @@ public class VerbTool {
         }
     }
 
+    public String checkAgreement(String subject, String verb){
+
+        String result = "NOT OK";
+        //subject of the verb e.g. in He loves her "he" is the subject
+        //verb e.g. in He loves her "loves" is the verb
+
+        String infinitive = verb_infinitive(verb);
+        
+        //Build a list of all possible valid conjugations for the given person/subject
+
+        options = { "I"     : "first_person_sing",
+                    "you"   : "second_person",
+                    "he"    : "third_person_sing",
+                    "she"   : "third_person_sing",
+                    "it"    : "third_person_sing",
+                    "one"   : "third_person_sing",
+                    "we"    : "first_person_plural",
+                    "they"  : "third_person_plural"
+        }   
+     
+        person=0;
+
+        if( "first" in options[subject.lower()] : person = 1;
+        if( "second" in options[subject.lower()] : person = 2;
+        if( "third" in options[subject.lower()] : person = 3; 
+        if( "plural" in options[subject.lower()] : person = "*"; 
+
+        ArrayList valid_conjugations = new ArrayList();
+        valid_conjugations.add( verb_present(infinitive, person, false) );
+        valid_conjugations.add( verb_past(infinitive, person, false) );
+       
+        for (String string : valid_conjugations) {
+            if(string.matches(verb)){
+                result = "OK";
+                break;
+            }
+        }
+         
+        // ', '.join(valid_conjugations)
+        return result;
+    }
+
     public String verb_infinitive(String v){
         /* Returns the uninflected form of the verb. */
 
