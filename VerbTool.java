@@ -1,3 +1,4 @@
+package com.iparadigms.ipgrammar;
 /* 
 * Adapted from original code written in Python by Tom De Smedt <tomdesmedt@organisms.be>
 * The verb.txt morphology was adopted from the XTAG morph_englis.flat:
@@ -8,6 +9,7 @@ import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.charset.Charset;
 
 public class VerbTool {
@@ -52,8 +54,11 @@ public class VerbTool {
         * Additionally, the following verbs can be negated:
         * be, can, do, will, must, have, may, need, dare, ought.
         */
-        
-        List<String> stringList = Files.readAllLines(new File("verb.txt").toPath(), Charset.defaultCharset());
+       
+        //TODO: change this so the code can find the verb.txt at runtime.
+        //May need to use: VerbTool.class.getResourceAsStream("verb.txt");
+        //See here http://howtodoinjava.com/2013/10/06/how-to-read-data-from-inputstream-into-string-in-java/
+        List<String> stringList = Files.readAllLines(Paths.get("verb.txt"), Charset.defaultCharset());
         String[] data = stringList.toArray(new String[]{});
         
         for(int i = 0; i < data.length; i++){
@@ -73,45 +78,43 @@ public class VerbTool {
         }
     }
 
-    public String checkAgreement(String subject, String verb){
+    public boolean checkAgreement(String subject, String verb){
 
-        String result = "NOT OK";
-        //subject of the verb e.g. in He loves her "he" is the subject
-        //verb e.g. in He loves her "loves" is the verb
+        boolean result = false;
+        /* subject of the verb e.g. in He loves her "he" is the subject
+        * verb e.g. in He loves her "loves" is the verbi
+        * */
 
         String infinitive = verb_infinitive(verb);
         
+        HashMap<String, String> options = new HashMap<String, String>();
+        options.put( "i"    ,   "first_person_sing" );
+        options.put( "you"  ,   "second_person" );
+        options.put( "he"   ,   "third_person_sing" );
+        options.put( "she"  ,   "third_person_sing" );
+        options.put( "it"   ,   "third_person_sing" );
+        options.put( "one"  ,   "third_person_sing" );
+        options.put( "we"   ,   "first_person_plural" );
+        options.put( "they" ,   "third_person_plural" );
+
+        String person = "";
+        if( options.get(subject.toLowerCase()).contains("first")  )   person  = "1";
+        if( options.get(subject.toLowerCase()).contains("second") )   person  = "2";
+        if( options.get(subject.toLowerCase()).contains("third")  )   person  = "3"; 
+        if( options.get(subject.toLowerCase()).contains("plural") )   person  = "*"; 
+        
         //Build a list of all possible valid conjugations for the given person/subject
-
-        options = { "I"     : "first_person_sing",
-                    "you"   : "second_person",
-                    "he"    : "third_person_sing",
-                    "she"   : "third_person_sing",
-                    "it"    : "third_person_sing",
-                    "one"   : "third_person_sing",
-                    "we"    : "first_person_plural",
-                    "they"  : "third_person_plural"
-        }   
-     
-        person=0;
-
-        if( "first" in options[subject.lower()] : person = 1;
-        if( "second" in options[subject.lower()] : person = 2;
-        if( "third" in options[subject.lower()] : person = 3; 
-        if( "plural" in options[subject.lower()] : person = "*"; 
-
-        ArrayList valid_conjugations = new ArrayList();
+        List<String> valid_conjugations = new ArrayList<String>();
         valid_conjugations.add( verb_present(infinitive, person, false) );
         valid_conjugations.add( verb_past(infinitive, person, false) );
        
         for (String string : valid_conjugations) {
             if(string.matches(verb)){
-                result = "OK";
+                result = true;
                 break;
             }
         }
          
-        // ', '.join(valid_conjugations)
         return result;
     }
 
