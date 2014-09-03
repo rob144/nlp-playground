@@ -7,10 +7,14 @@ package com.iparadigms.ipgrammar;
 
 import java.util.*;
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.charset.Charset;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class VerbTool {
 
@@ -18,7 +22,9 @@ public class VerbTool {
     private HashMap<String, String> verb_tenses_aliases = new HashMap<String, String>();
     private HashMap<String, String[]> verb_tenses = new HashMap<String, String[]>();
     private Map<String, String> verb_lemmas = new HashMap<String, String>();
-    
+    private String VERBS_FILENAME = "verb.txt";
+    private final Logger LOG = Logger.getLogger(VerbTool.class.getName());
+
     public VerbTool() throws IOException {
         
         verb_tenses_keys.put( "infinitive"           , 0 );
@@ -34,17 +40,17 @@ public class VerbTool {
         verb_tenses_keys.put( "past"                 , 10 );
         verb_tenses_keys.put( "past participle"      , 11 );
 
-        verb_tenses_aliases.put( "inf"      ,   "infinitive" );
-        verb_tenses_aliases.put( "1sgpres"  ,   "1st singular present" );
-        verb_tenses_aliases.put( "2sgpres"  ,   "2nd singular present" );
-        verb_tenses_aliases.put( "3sgpres"  ,   "3rd singular present" );
-        verb_tenses_aliases.put( "pl"       ,   "present plural" );
-        verb_tenses_aliases.put( "prog"     ,   "present participle" );
-        verb_tenses_aliases.put( "1sgpast"  ,   "1st singular past" );
-        verb_tenses_aliases.put( "2sgpast"  ,   "2nd singular past" );
-        verb_tenses_aliases.put( "3sgpast"  ,   "3rd singular past" );
-        verb_tenses_aliases.put( "pastpl"   ,   "past plural" );
-        verb_tenses_aliases.put( "ppart"    ,   "past participle" );
+        verb_tenses_aliases.put( "inf"      ,   "infinitive"            );
+        verb_tenses_aliases.put( "1sgpres"  ,   "1st singular present"  );
+        verb_tenses_aliases.put( "2sgpres"  ,   "2nd singular present"  );
+        verb_tenses_aliases.put( "3sgpres"  ,   "3rd singular present"  );
+        verb_tenses_aliases.put( "pl"       ,   "present plural"        );
+        verb_tenses_aliases.put( "prog"     ,   "present participle"    );
+        verb_tenses_aliases.put( "1sgpast"  ,   "1st singular past"     );
+        verb_tenses_aliases.put( "2sgpast"  ,   "2nd singular past"     );
+        verb_tenses_aliases.put( "3sgpast"  ,   "3rd singular past"     );
+        verb_tenses_aliases.put( "pastpl"   ,   "past plural"           );
+        verb_tenses_aliases.put( "ppart"    ,   "past participle"       );
 
         /* Each verb has morphs for infinitve,
         * 3rd singular present, present participle,
@@ -54,12 +60,8 @@ public class VerbTool {
         * Additionally, the following verbs can be negated:
         * be, can, do, will, must, have, may, need, dare, ought.
         */
-       
-        //TODO: change this so the code can find the verb.txt at runtime.
-        //May need to use: VerbTool.class.getResourceAsStream("verb.txt");
-        //See here http://howtodoinjava.com/2013/10/06/how-to-read-data-from-inputstream-into-string-in-java/
-        List<String> stringList = Files.readAllLines(Paths.get("verb.txt"), Charset.defaultCharset());
-        String[] data = stringList.toArray(new String[]{});
+        
+        String[] data = loadVerbData();
         
         for(int i = 0; i < data.length; i++){
             String[] a = data[i].trim().split(",");
@@ -78,7 +80,29 @@ public class VerbTool {
         }
     }
 
-    public boolean checkAgreement(String subject, String verb){
+    private String[] loadVerbData(){
+        //See here http://howtodoinjava.com/2013/10/06/how-to-read-data-from-inputstream-into-string-in-java/
+       
+        String line = null;
+        ArrayList<String> stringList = new ArrayList<String>();
+        
+        try{
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                VerbTool.class.getResourceAsStream(VERBS_FILENAME)));
+            while ((line = reader.readLine()) != null) {
+                stringList.add(line);
+            }
+            reader.close();
+        }catch(IOException ex){
+             System.out.println(ex.getMessage());
+        }
+
+        return stringList.toArray(new String[]{});
+    }
+
+    public boolean checkAgreement(String prevWord, String subject, String verb){
+ 
+ LOG.log(Level.INFO, "prevWord: " + prevWord );
 
         boolean result = false;
         /* subject of the verb e.g. in He loves her "he" is the subject
@@ -106,8 +130,16 @@ public class VerbTool {
         //Build a list of all possible valid conjugations for the given person/subject
         List<String> valid_conjugations = new ArrayList<String>();
         valid_conjugations.add( verb_present(infinitive, person, false) );
-        valid_conjugations.add( verb_past(infinitive, person, false) );
-       
+        if(prevWord.toLowerCase().matches("did|didn\'t|can|can\'t|could|couldn't|would|wouldn't|should|shouldn't|will|won't")){
+            valid_conjugations.add( infinitive );
+        }else{
+            valid_conjugations.add( verb_past(infinitive, person, false) );
+        }
+        
+        String listString = "";
+        for (String s : valid_conjugations){ listString += s + "\t"; }
+        LOG.log(Level.INFO, "VALID CONJUGATIONS: " + listString );
+
         for (String string : valid_conjugations) {
             if(string.matches(verb)){
                 result = true;
@@ -153,7 +185,6 @@ public class VerbTool {
         */
         
         person = person.replace("pl","*");
-        //person = person.trim("stndrgural");
         person = person.trim();
         
         Map<String, String> hashPersons = new HashMap<String, String>();
@@ -189,17 +220,18 @@ public class VerbTool {
         */
 
         person = person.replace("pl","*");
-        //person = person.trim("stndrgural");
         person = person.trim();
 
-        Map<String, String> hashPersons = new HashMap<String, String>();
-        hashPersons.put( "1" , "1st singular present" ); 
-        hashPersons.put( "2" , "2nd singular present" ); 
-        hashPersons.put( "3" , "3rd singular present" ); 
-        hashPersons.put( "*" , "past plural" ); 
-        
-        if( hashPersons.containsKey(person) && verb_conjugate(v, hashPersons.get(person), negate) != ""){
-            return verb_conjugate(v, hashPersons.get(person), negate);
+        Map<String, String> hashPersonTense = new HashMap<String, String>();
+        hashPersonTense.put( "1" , "1st singular past" ); 
+        hashPersonTense.put( "2" , "2nd singular past" ); 
+        hashPersonTense.put( "3" , "3rd singular past" ); 
+        hashPersonTense.put( "*" , "past plural" ); 
+       
+        if( hashPersonTense.containsKey(person) 
+            && verb_conjugate(v, hashPersonTense.get(person), negate).trim().length() > 0){
+LOG.log(Level.INFO, "verb_past: " +verb_conjugate(v, hashPersonTense.get(person), negate) );
+            return verb_conjugate(v, hashPersonTense.get(person), negate);
         }
 
         return verb_conjugate(v, "past", negate);
