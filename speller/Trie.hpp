@@ -7,29 +7,53 @@ using namespace std;
 
 class Trie
 {
+
 public:
-    static TrieNode* createTree()
-    {
+    
+    static TrieNode* createTree(){
         return(new TrieNode('\0'));
     }
-    static void insertWord(TrieNode root, string word)
+
+    static void insertWord(TrieNode *ptr_root, char ptr_chars[])
     {
         int offset = 97;
-        int l = word.length();
-        char chars[word.size()+1];
-        strcpy(chars, word.c_str());
-        TrieNode curNode = root;
+        TrieNode *ptr_node = ptr_root;
         
-        for (int i = 0; i < l; i++)
-        {
-            if (curNode.links[chars[i]-offset].letter == '\0')
-                curNode.links[chars[i]-offset].letter = chars[i];
-            curNode = curNode.links[chars[i]-offset];
+        while(*ptr_chars){
+            int index = *ptr_chars - offset;
+            if (ptr_node->links[index] == NULL)
+                ptr_node->links[index] = TrieNode (*ptr_chars[i]);
+            ptr_node = ptr_node->links[index];
+            ptr_chars++;
         }
-        curNode.fullWord = true;  
+        ptr_node->fullWord = true;  
     }
-    static string printTrie(){
-        return "TODO: PRINT TRIE\n";
+   
+    static void printTrie(TrieNode *ptr_root){
+        printTrieNode(ptr_root, 0, new char[50]);
+    }
+
+    static void printTrieNode(TrieNode *ptr_node, int level, char branch[]){
+        if (ptr_node == NULL)
+            return;
+        
+        TrieNode *links = ptr_node->links;
+        while (){
+            branch[level] = node.letter;
+            printTree(node.links[i], level+1, branch);    
+        }
+        
+        if (node.fullWord){
+            string word = "";
+            for (int j = 1; j <= level; j++)
+                 word.append(1, branch[j]);
+            cout << "WORD: " << word << "\n"; 
+        }
+    }
+
+    static int numLinks(TrieNode linksArray[]){
+        TrieNode tempNode ('a');
+        return sizeof(linksArray) / sizeof(tempNode);
     }
 
 };
