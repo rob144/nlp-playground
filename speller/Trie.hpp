@@ -7,22 +7,22 @@ using namespace std;
 
 class Trie
 {
-
+private:
+    //a-z (26) + A-Z (26) + 0-9 (10) = 62
+    static const int NUM_OF_LINKS = 62;
+    static const int MAX_DEPTH = 200;
 public:
-    
-    static TrieNode* createTree(){
-        return(new TrieNode('\0'));
-    }
-
-    static void insertWord(TrieNode *ptr_root, char ptr_chars[])
-    {
+    static void insertWord(TrieNode *ptr_root, const char ptr_chars[]){
         int offset = 97;
         TrieNode *ptr_node = ptr_root;
         
         while(*ptr_chars){
             int index = *ptr_chars - offset;
-            if (ptr_node->links[index] == NULL)
-                ptr_node->links[index] = TrieNode (*ptr_chars[i]);
+            //Add node if there is a space at the relevant position 
+            if (ptr_node->links[index] == NULL){
+                ptr_node->links[index] = new TrieNode (*ptr_chars);
+            }
+            //Get child node at the relevant position on the next level
             ptr_node = ptr_node->links[index];
             ptr_chars++;
         }
@@ -30,30 +30,30 @@ public:
     }
    
     static void printTrie(TrieNode *ptr_root){
-        printTrieNode(ptr_root, 0, new char[50]);
+        char branch[MAX_DEPTH + 1] = {};
+        printTrieNode(ptr_root, 0, branch);
     }
 
     static void printTrieNode(TrieNode *ptr_node, int level, char branch[]){
         if (ptr_node == NULL)
             return;
         
-        TrieNode *links = ptr_node->links;
-        while (){
-            branch[level] = node.letter;
-            printTree(node.links[i], level+1, branch);    
-        }
+        branch[level] = ptr_node->letter;
         
-        if (node.fullWord){
-            string word = "";
-            for (int j = 1; j <= level; j++)
-                 word.append(1, branch[j]);
-            cout << "WORD: " << word << "\n"; 
-        }
+        //Recurse through all the child nodes looking for more letters
+        for (int i = 0; i < NUM_OF_LINKS; i++){ 
+            printTrieNode(ptr_node->links[i], level+1, branch);    
+        }       
+        if (ptr_node->fullWord) 
+            printWord(branch, level);
     }
 
-    static int numLinks(TrieNode linksArray[]){
-        TrieNode tempNode ('a');
-        return sizeof(linksArray) / sizeof(tempNode);
+    static void printWord(char branch[], int length){
+        for(int i=1; i <= length && i < MAX_DEPTH; i++){
+            if(branch[i] == '\0') break;
+            cout << branch[i];
+        }
+        cout << "\n";
     }
 
 };

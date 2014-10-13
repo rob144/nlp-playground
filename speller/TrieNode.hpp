@@ -2,8 +2,9 @@
 class TrieNode {
 
 public:
+    static const int MAX_DEPTH = 200;
     char letter;
-    TrieNode *links[42];
+    TrieNode *links[MAX_DEPTH];
     bool fullWord;
     
     TrieNode () { }
